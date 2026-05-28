@@ -146,8 +146,8 @@
                             <a href="{{ route('reparaciones.imprimir-orden', $reparacion) }}" class="text-gray-600 hover:text-gray-700" title="Imprimir" target="_blank">
                                 <i class="fas fa-print"></i>
                             </a>
-                            @if($reparacion->estado === 'listo' && !$reparacion->notificado_listo)
-                            <a href="{{ route('reparaciones.notificar', $reparacion) }}" class="text-green-600 hover:text-green-700" title="Notificar">
+                            @if($reparacion->cliente?->telefono && $reparacion->estado !== 'cancelado')
+                            <a href="{{ route('reparaciones.notificar', $reparacion) }}" target="_blank" class="text-green-600 hover:text-green-700" title="{{ $reparacion->notificado_listo ? 'Reenviar aviso' : 'Notificar' }}">
                                 <i class="fab fa-whatsapp"></i>
                             </a>
                             @endif

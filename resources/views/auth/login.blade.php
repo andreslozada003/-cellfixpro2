@@ -70,7 +70,7 @@
                         <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm">
                             <i class="fas fa-mobile-alt text-2xl"></i>
                         </div>
-                        <span class="text-2xl font-bold">Tecno Star</span>
+                        <span class="text-2xl font-bold">Alfa Digital Soluctions SAS</span>
                     </div>
                     
                     <h1 class="text-3xl lg:text-4xl font-bold mb-4 animate-float">

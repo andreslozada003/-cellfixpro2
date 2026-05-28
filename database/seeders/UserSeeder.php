@@ -16,7 +16,7 @@ class UserSeeder extends Seeder
         // Usuario Admin
         $admin = User::create([
             'name' => 'Administrador',
-            'email' => 'admin@cellfix.com',
+            'email' => 'admin@gmail.com',
             'password' => Hash::make('password'),
             'phone' => '555-0100',
             'is_active' => true,
@@ -26,7 +26,7 @@ class UserSeeder extends Seeder
         // Usuario Técnico
         $tecnico = User::create([
             'name' => 'Técnico Principal',
-            'email' => 'tecnico@cellfix.com',
+            'email' => 'tecnico@gmail.com',
             'password' => Hash::make('password'),
             'phone' => '555-0101',
             'is_active' => true,
@@ -36,7 +36,7 @@ class UserSeeder extends Seeder
         // Usuario Vendedor
         $vendedor = User::create([
             'name' => 'Vendedor Principal',
-            'email' => 'vendedor@cellfix.com',
+            'email' => 'vendedor@gmail.com',
             'password' => Hash::make('password'),
             'phone' => '555-0102',
             'is_active' => true,

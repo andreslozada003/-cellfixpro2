@@ -6,6 +6,7 @@ use App\Models\Cliente;
 use App\Models\Configuracion;
 use App\Models\Reparacion;
 use App\Models\User;
+use App\Support\MoraSupport;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -403,13 +404,53 @@ class ReparacionController extends Controller
      */
     public function notificar(Reparacion $reparacion)
     {
-        if (! $reparacion->cliente->telefono) {
+        $reparacion->load(['cliente', 'usuario', 'tecnico']);
+
+        if (! $reparacion->cliente?->telefono) {
             return back()->with('error', 'El cliente no tiene telefono registrado.');
+        }
+
+        $whatsappUrl = MoraSupport::whatsappUrl(
+            $reparacion->cliente->telefono,
+            $this->mensajeNotificacionReparacion($reparacion)
+        );
+
+        if (! $whatsappUrl) {
+            return back()->with('error', 'El cliente no tiene un numero de WhatsApp valido.');
         }
 
         $reparacion->marcarNotificado();
 
-        return back()->with('success', 'Cliente notificado correctamente.');
+        return redirect()->away($whatsappUrl);
+    }
+
+    private function mensajeNotificacionReparacion(Reparacion $reparacion): string
+    {
+        $cliente = $reparacion->cliente?->nombre_completo ?: 'cliente';
+        $equipo = trim(collect([
+            $reparacion->dispositivo_tipo,
+            $reparacion->dispositivo_marca,
+            $reparacion->dispositivo_modelo,
+        ])->filter()->implode(' ')) ?: 'equipo';
+        $diagnostico = $reparacion->diagnostico ?: $reparacion->problema_reportado ?: 'pendiente de diagnostico';
+        $fechaEntrega = $reparacion->fecha_estimada_entrega
+            ? $reparacion->fecha_estimada_entrega->format('d/m/Y H:i')
+            : 'pendiente por confirmar';
+        $valorReparacion = (float) ($reparacion->costo_final > 0 ? $reparacion->costo_final : $reparacion->costo_estimado);
+        $abono = (float) $reparacion->adelanto;
+        $saldo = max(0, $valorReparacion - $abono);
+        $adminTelefono = auth()->user()?->phone ?: Configuracion::get('empresa.telefono', '');
+        $contacto = $adminTelefono ? " Puedes comunicarte con el administrador al {$adminTelefono}." : '';
+
+        return "Hola, {$cliente}. Te informamos sobre tu reparacion {$reparacion->orden}.\n"
+            . "Equipo: {$equipo}.\n"
+            . "Estado: {$reparacion->estado_nombre}.\n"
+            . "Diagnostico: {$diagnostico}.\n"
+            . "Entrega estimada: {$fechaEntrega}.\n"
+            . "Valor de la reparacion: " . money($valorReparacion) . ".\n"
+            . "Abono registrado: " . money($abono) . ".\n"
+            . "Saldo pendiente: " . money($saldo) . ".\n\n"
+            . "Importante: pasados 30 dias sin retirar el equipo, no se respondera por ningun equipo ni por abonos previos a la reparacion.{$contacto}";
     }
 
     /**

@@ -81,9 +81,9 @@
             </form>
             @endif
 
-            @if($reparacion->estado === 'listo' && !$reparacion->notificado_listo)
+            @if($cliente?->telefono && $reparacion->estado !== 'cancelado')
             <a href="{{ route('reparaciones.notificar', $reparacion) }}" class="inline-flex items-center rounded-lg bg-green-600 px-4 py-2 text-white transition-colors hover:bg-green-700">
-                <i class="fab fa-whatsapp mr-2"></i>Notificar
+                <i class="fab fa-whatsapp mr-2"></i>{{ $reparacion->notificado_listo ? 'Reenviar aviso' : 'Notificar' }}
             </a>
             @endif
         </div>
@@ -213,9 +213,18 @@
 
             <div class="border-t border-gray-200 pt-4">
                 <p class="text-sm text-gray-500">Notificacion al cliente</p>
-                <p class="font-medium {{ $reparacion->notificado_listo ? 'text-green-600' : 'text-gray-700' }}">
-                    {{ $reparacion->notificado_listo ? 'Cliente notificado' : 'Aun no notificado' }}
-                </p>
+                <div class="mt-1 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <p class="font-medium {{ $reparacion->notificado_listo ? 'text-green-600' : 'text-gray-700' }}">
+                        {{ $reparacion->notificado_listo ? 'Cliente notificado' : 'Aun no notificado' }}
+                    </p>
+                    @if($cliente?->telefono && $reparacion->estado !== 'cancelado')
+                    <a href="{{ route('reparaciones.notificar', $reparacion) }}" target="_blank" class="inline-flex items-center justify-center rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-green-700">
+                        <i class="fab fa-whatsapp mr-2"></i>{{ $reparacion->notificado_listo ? 'Reenviar WhatsApp' : 'Enviar WhatsApp' }}
+                    </a>
+                    @else
+                    <span class="text-sm text-gray-500">Sin telefono para WhatsApp</span>
+                    @endif
+                </div>
             </div>
         </div>
     </div>
