@@ -8,9 +8,25 @@ use App\Models\Reparacion;
 use App\Models\User;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 
 class ReparacionController extends Controller
 {
+    /**
+     * Tecnicos activos que pueden asignarse a una reparacion.
+     */
+    private function tecnicosAsignables()
+    {
+        return User::query()
+            ->whereHas('roles', function ($query) {
+                $query->whereIn('name', ['tecnico', 'technician']);
+            })
+            ->active()
+            ->orderBy('name')
+            ->get();
+    }
+
     /**
      * Constructor
      */
@@ -18,7 +34,7 @@ class ReparacionController extends Controller
     {
         $this->middleware('auth');
         $this->middleware('can:ver reparaciones')->only(['index', 'show']);
-        $this->middleware('can:crear reparaciones')->only(['create', 'store']);
+        $this->middleware('can:crear reparaciones')->only(['create', 'store', 'createTecnico', 'storeTecnico']);
         $this->middleware('can:editar reparaciones')->only(['edit', 'update']);
         $this->middleware('can:cambiar estado reparaciones')->only(['cambiarEstado']);
     }
@@ -67,7 +83,7 @@ class ReparacionController extends Controller
         }
 
         $reparaciones = $query->latest('fecha_recepcion')->paginate(20);
-        $tecnicos = User::role('tecnico')->active()->get();
+        $tecnicos = $this->tecnicosAsignables();
         $estados = Reparacion::ESTADOS;
 
         $pendientes = Reparacion::pendientes()->count();
@@ -90,7 +106,7 @@ class ReparacionController extends Controller
     public function create()
     {
         $clientes = Cliente::active()->get();
-        $tecnicos = User::role('tecnico')->active()->get();
+        $tecnicos = $this->tecnicosAsignables();
         $garantiaDefault = Configuracion::get('reparaciones.garantia_default', 30);
         $diasEstimados = Configuracion::get('reparaciones.dias_estimados_default', 3);
 
@@ -100,6 +116,50 @@ class ReparacionController extends Controller
             'garantiaDefault',
             'diasEstimados'
         ));
+    }
+
+    /**
+     * Mostrar formulario para ingresar tecnico
+     */
+    public function createTecnico()
+    {
+        return view('reparaciones.tecnico-create');
+    }
+
+    /**
+     * Guardar tecnico para asignarlo en ordenes
+     */
+    public function storeTecnico(Request $request)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'phone' => 'nullable|string|max:20',
+            'email' => 'nullable|email|unique:users,email',
+        ]);
+
+        $email = $validated['email'] ?? null;
+
+        if (! $email) {
+            $base = Str::slug($validated['name']) ?: 'tecnico';
+
+            do {
+                $email = $base . '-' . Str::lower(Str::random(6)) . '@tecnico.local';
+            } while (User::where('email', $email)->exists());
+        }
+
+        $tecnico = User::create([
+            'name' => $validated['name'],
+            'email' => $email,
+            'password' => Hash::make(Str::random(32)),
+            'phone' => $validated['phone'] ?? null,
+            'is_active' => true,
+        ]);
+
+        $tecnico->assignRole('tecnico');
+
+        return redirect()
+            ->route('reparaciones.create', ['tecnico_id' => $tecnico->id])
+            ->with('success', 'Tecnico ingresado correctamente. Ya aparece seleccionado en la nueva orden.');
     }
 
     /**
@@ -118,6 +178,8 @@ class ReparacionController extends Controller
             'dispositivo_serial' => 'nullable|string|max:50',
             'dispositivo_contrasena' => 'nullable|string|max:100',
             'problema_reportado' => 'required|string',
+            'diagnostico' => 'nullable|string',
+            'solucion' => 'nullable|string',
             'costo_estimado' => 'nullable|numeric|min:0',
             'adelanto' => 'nullable|numeric|min:0',
             'fecha_estimada_entrega' => 'nullable|date',
@@ -176,7 +238,7 @@ class ReparacionController extends Controller
     {
         $reparacion->load(['cliente', 'usuario', 'tecnico', 'historial.usuario']);
 
-        $tecnicos = User::role('tecnico')->active()->get();
+        $tecnicos = $this->tecnicosAsignables();
         $estados = Reparacion::ESTADOS;
 
         return view('reparaciones.show', compact('reparacion', 'tecnicos', 'estados'));
@@ -188,7 +250,7 @@ class ReparacionController extends Controller
     public function edit(Reparacion $reparacion)
     {
         $clientes = Cliente::active()->get();
-        $tecnicos = User::role('tecnico')->active()->get();
+        $tecnicos = $this->tecnicosAsignables();
 
         return view('reparaciones.edit', compact('reparacion', 'clientes', 'tecnicos'));
     }

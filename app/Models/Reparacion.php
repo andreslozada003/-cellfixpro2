@@ -314,7 +314,7 @@ class Reparacion extends Model
      */
     public function getSaldoPendienteAttribute(): float
     {
-        return max(0, $this->costo_final - $this->adelanto);
+        return max(0, $this->valor_operacion_mora - (float) $this->adelanto);
     }
 
     public function getValorOperacionMoraAttribute(): float
@@ -347,7 +347,7 @@ class Reparacion extends Model
      */
     public function getEstaPagadaAttribute(): bool
     {
-        return $this->adelanto >= $this->costo_final;
+        return (float) $this->adelanto >= $this->valor_operacion_mora;
     }
 
     /**

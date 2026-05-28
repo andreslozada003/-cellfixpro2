@@ -96,6 +96,10 @@
                     <i class="fas fa-plus w-4"></i>
                     <span>Nueva Orden</span>
                 </a>
+                <a href="{{ route('reparaciones.tecnicos.create') }}" class="flex items-center space-x-3 px-3 py-2 rounded-lg text-sm {{ request()->routeIs('reparaciones.tecnicos.*') ? 'text-primary-400' : 'text-gray-400 hover:text-white' }}">
+                    <i class="fas fa-user-plus w-4"></i>
+                    <span>Ingresar Tecnico</span>
+                </a>
                 @endcan
                 @role('tecnico')
                 <a href="{{ route('reparaciones.panel-tecnico') }}" class="flex items-center space-x-3 px-3 py-2 rounded-lg text-sm {{ request()->routeIs('reparaciones.panel-tecnico') ? 'text-primary-400' : 'text-gray-400 hover:text-white' }}">

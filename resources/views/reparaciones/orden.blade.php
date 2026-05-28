@@ -2,412 +2,276 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Orden de Reparación #{{ $reparacion->numero_orden }}</title>
+    <title>Orden de Reparacion #{{ $reparacion->orden }}</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { box-sizing: border-box; }
         body {
-            font-family: Arial, sans-serif;
+            margin: 0;
+            font-family: DejaVu Sans, Arial, sans-serif;
             font-size: 12px;
-            line-height: 1.4;
-            color: #333;
+            color: #1f2937;
+            line-height: 1.45;
         }
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-        }
+        .container { padding: 22px; }
         .header {
+            border-bottom: 3px solid #1f2937;
+            padding-bottom: 14px;
+            margin-bottom: 18px;
             text-align: center;
-            border-bottom: 2px solid #333;
-            padding-bottom: 15px;
-            margin-bottom: 20px;
         }
-        .header h1 {
-            font-size: 24px;
-            margin-bottom: 5px;
+        .header h1 { margin: 0 0 4px; font-size: 24px; }
+        .muted { color: #6b7280; }
+        .order-box {
+            background: #f3f4f6;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+            padding: 14px;
+            margin-bottom: 16px;
         }
-        .header p {
-            color: #666;
-        }
-        .orden-info {
-            background: #f5f5f5;
-            padding: 15px;
-            margin-bottom: 20px;
-            border-radius: 5px;
-        }
-        .orden-info h2 {
-            font-size: 18px;
-            margin-bottom: 10px;
-            color: #333;
-        }
-        .info-grid {
-            display: table;
-            width: 100%;
-        }
-        .info-row {
-            display: table-row;
-        }
-        .info-cell {
-            display: table-cell;
-            padding: 5px 10px;
-            width: 50%;
-        }
-        .info-cell strong {
-            color: #555;
-        }
+        .order-box h2 { margin: 0 0 10px; font-size: 18px; }
         .section {
-            margin-bottom: 20px;
-            border: 1px solid #ddd;
-            padding: 15px;
-            border-radius: 5px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            margin-bottom: 14px;
+            overflow: hidden;
         }
         .section h3 {
-            font-size: 14px;
-            background: #333;
-            color: #fff;
+            margin: 0;
             padding: 8px 12px;
-            margin: -15px -15px 15px -15px;
-            border-radius: 5px 5px 0 0;
+            background: #111827;
+            color: #fff;
+            font-size: 13px;
+            letter-spacing: .02em;
         }
-        .section-content {
-            margin-top: 10px;
-        }
-        .dispositivo-info {
-            display: table;
-            width: 100%;
-        }
-        .dispositivo-row {
-            display: table-row;
-        }
-        .dispositivo-cell {
-            display: table-cell;
-            padding: 5px 10px;
-            width: 33.33%;
-        }
-        .estado-badge {
-            display: inline-block;
-            padding: 5px 15px;
-            border-radius: 15px;
-            font-weight: bold;
-            font-size: 14px;
-        }
-        .estado-recibido { background: #fbbf24; color: #000; }
-        .estado-diagnostico { background: #3b82f6; color: #fff; }
-        .estado-reparacion { background: #f97316; color: #fff; }
-        .estado-listo { background: #8b5cf6; color: #fff; }
-        .estado-entregado { background: #10b981; color: #fff; }
-        .estado-cancelado { background: #ef4444; color: #fff; }
-        .accesorios-list {
-            list-style: none;
-            padding: 0;
-        }
-        .accesorios-list li {
-            display: inline-block;
-            margin: 3px;
-            padding: 3px 10px;
-            background: #e5e7eb;
-            border-radius: 12px;
-            font-size: 11px;
-        }
-        .condiciones {
-            background: #fef3c7;
-            border: 1px solid #f59e0b;
-            padding: 15px;
+        .section-body { padding: 12px; }
+        table { width: 100%; border-collapse: collapse; }
+        td { padding: 5px 8px; vertical-align: top; }
+        .label { color: #4b5563; font-weight: bold; }
+        .text-box {
+            margin-top: 5px;
+            padding: 9px;
             border-radius: 5px;
-            margin-top: 20px;
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            white-space: pre-line;
         }
-        .condiciones h4 {
-            color: #92400e;
-            margin-bottom: 10px;
+        .money-table td {
+            border-bottom: 1px solid #e5e7eb;
+            padding: 8px;
         }
-        .condiciones ol {
-            margin-left: 20px;
+        .money-table tr:last-child td { border-bottom: 0; }
+        .right { text-align: right; }
+        .badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 999px;
+            background: #dbeafe;
+            color: #1e40af;
+            font-weight: bold;
+        }
+        .terms {
+            padding: 12px;
+            border: 1px solid #f59e0b;
+            border-radius: 6px;
+            background: #fffbeb;
             color: #78350f;
+            margin-top: 8px;
         }
-        .condiciones li {
-            margin-bottom: 5px;
-        }
-        .firma-section {
-            margin-top: 40px;
+        .terms h4 { margin: 0 0 8px; color: #92400e; }
+        .terms ol { margin: 0 0 0 18px; padding: 0; }
+        .signatures {
             display: table;
             width: 100%;
+            margin-top: 38px;
         }
-        .firma-box {
+        .signature {
             display: table-cell;
             width: 50%;
             text-align: center;
-            padding: 20px;
+            padding: 18px;
         }
-        .firma-line {
-            border-top: 1px solid #333;
-            margin-top: 50px;
-            padding-top: 5px;
+        .line {
+            border-top: 1px solid #111827;
+            padding-top: 6px;
         }
         .footer {
-            margin-top: 30px;
+            border-top: 1px solid #d1d5db;
+            margin-top: 22px;
+            padding-top: 10px;
             text-align: center;
             font-size: 10px;
-            color: #666;
-            border-top: 1px solid #ddd;
-            padding-top: 15px;
-        }
-        .qr-code {
-            text-align: center;
-            margin: 15px 0;
-        }
-        .qr-placeholder {
-            width: 100px;
-            height: 100px;
-            border: 2px dashed #ccc;
-            margin: 0 auto;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 10px;
-            color: #999;
-        }
-        @media print {
-            body {
-                print-color-adjust: exact;
-                -webkit-print-color-adjust: exact;
-            }
-            .no-print {
-                display: none;
-            }
+            color: #6b7280;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <!-- Header -->
-        <div class="header">
-            <h1>{{ config('app.name', 'CellFix Pro') }}</h1>
-            <p>{{ config('app.direccion', 'Tu dirección aquí') }}</p>
-            <p>Tel: {{ config('app.telefono', 'Tu teléfono') }} | Email: {{ config('app.email', 'tu@email.com') }}</p>
-        </div>
+@php
+    $cliente = $reparacion->cliente;
+    $tecnico = $reparacion->tecnico;
+    $recibidoPor = $reparacion->usuario;
+    $costoEstimado = (float) $reparacion->costo_estimado;
+    $costoFinalRegistrado = (float) $reparacion->costo_final;
+    $costoFinal = $costoFinalRegistrado > 0 ? $costoFinalRegistrado : $costoEstimado;
+    $saldoPendiente = max(0, $costoFinal - (float) $reparacion->adelanto);
+@endphp
 
-        <!-- Orden Info -->
-        <div class="orden-info">
-            <h2>ORDEN DE REPARACIÓN #{{ $reparacion->numero_orden }}</h2>
-            <div class="info-grid">
-                <div class="info-row">
-                    <div class="info-cell">
-                        <strong>Fecha de Recepción:</strong> {{ $reparacion->fecha_recepcion->format('d/m/Y H:i') }}
-                    </div>
-                    <div class="info-cell">
-                        <strong>Estado:</strong> 
-                        <span class="estado-badge estado-{{ strtolower(str_replace(' ', '-', $reparacion->estado)) }}">
-                            {{ $reparacion->estado }}
-                        </span>
-                    </div>
-                </div>
-                @if($reparacion->fecha_entrega)
-                <div class="info-row">
-                    <div class="info-cell">
-                        <strong>Fecha de Entrega:</strong> {{ $reparacion->fecha_entrega->format('d/m/Y H:i') }}
-                    </div>
-                    <div class="info-cell">
-                        <strong>Técnico Asignado:</strong> {{ $reparacion->tecnico->name ?? 'No asignado' }}
-                    </div>
-                </div>
-                @endif
-            </div>
-        </div>
+<div class="container">
+    <div class="header">
+        <h1>{{ $empresa['nombre'] ?? config('app.name', 'CellFix Pro') }}</h1>
+        <div class="muted">{{ $empresa['direccion'] ?: 'Direccion no configurada' }}</div>
+        <div class="muted">Tel: {{ $empresa['telefono'] ?: 'Telefono no configurado' }}</div>
+    </div>
 
-        <!-- Información del Cliente -->
-        <div class="section">
-            <h3>INFORMACIÓN DEL CLIENTE</h3>
-            <div class="section-content">
-                <div class="info-grid">
-                    <div class="info-row">
-                        <div class="info-cell">
-                            <strong>Nombre:</strong> {{ $reparacion->cliente->nombre }}
-                        </div>
-                        <div class="info-cell">
-                            <strong>Teléfono:</strong> {{ $reparacion->cliente->telefono }}
-                        </div>
-                    </div>
-                    <div class="info-row">
-                        <div class="info-cell">
-                            <strong>Email:</strong> {{ $reparacion->cliente->email ?? 'N/A' }}
-                        </div>
-                        <div class="info-cell">
-                            <strong>Documento:</strong> {{ $reparacion->cliente->documento ?? 'N/A' }}
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+    <div class="order-box">
+        <h2>ORDEN DE REPARACION #{{ $reparacion->orden }}</h2>
+        <table>
+            <tr>
+                <td><span class="label">Fecha de recepcion:</span> {{ $reparacion->fecha_recepcion?->format('d/m/Y H:i') ?? 'Sin registrar' }}</td>
+                <td><span class="label">Estado:</span> <span class="badge">{{ $reparacion->estado_nombre }}</span></td>
+            </tr>
+            <tr>
+                <td><span class="label">Entrega estimada:</span> {{ $reparacion->fecha_estimada_entrega?->format('d/m/Y') ?? 'Pendiente' }}</td>
+                <td><span class="label">Tecnico:</span> {{ $tecnico?->name ?? 'No asignado' }}</td>
+            </tr>
+        </table>
+    </div>
 
-        <!-- Información del Dispositivo -->
-        <div class="section">
-            <h3>INFORMACIÓN DEL DISPOSITIVO</h3>
-            <div class="section-content">
-                <div class="dispositivo-info">
-                    <div class="dispositivo-row">
-                        <div class="dispositivo-cell">
-                            <strong>Tipo:</strong> {{ $reparacion->tipo_dispositivo }}
-                        </div>
-                        <div class="dispositivo-cell">
-                            <strong>Marca:</strong> {{ $reparacion->marca }}
-                        </div>
-                        <div class="dispositivo-cell">
-                            <strong>Modelo:</strong> {{ $reparacion->modelo }}
-                        </div>
-                    </div>
-                    <div class="dispositivo-row">
-                        <div class="dispositivo-cell">
-                            <strong>Color:</strong> {{ $reparacion->color ?? 'N/A' }}
-                        </div>
-                        <div class="dispositivo-cell">
-                            <strong>IMEI/SN:</strong> {{ $reparacion->imei ?? 'N/A' }}
-                        </div>
-                        <div class="dispositivo-cell">
-                            <strong>Contraseña:</strong> {{ $reparacion->contrasena ?? 'N/A' }}
-                        </div>
-                    </div>
-                </div>
-                @if($reparacion->accesorios_dejados)
-                <div style="margin-top: 15px;">
-                    <strong>Accesorios Dejados:</strong>
-                    <ul class="accesorios-list">
-                        @foreach(json_decode($reparacion->accesorios_dejados, true) ?? [] as $accesorio)
-                        <li>{{ $accesorio }}</li>
-                        @endforeach
-                    </ul>
-                </div>
-                @endif
-            </div>
-        </div>
-
-        <!-- Descripción del Problema -->
-        <div class="section">
-            <h3>DESCRIPCIÓN DEL PROBLEMA</h3>
-            <div class="section-content">
-                <p><strong>Tipo de Falla:</strong> {{ $reparacion->tipo_falla }}</p>
-                <p style="margin-top: 10px;"><strong>Descripción:</strong></p>
-                <p style="background: #f9fafb; padding: 10px; border-radius: 5px; margin-top: 5px;">
-                    {{ $reparacion->descripcion_problema }}
-                </p>
-                @if($reparacion->condiciones_fisicas)
-                <p style="margin-top: 10px;"><strong>Condiciones Físicas:</strong></p>
-                <p style="background: #f9fafb; padding: 10px; border-radius: 5px; margin-top: 5px;">
-                    {{ $reparacion->condiciones_fisicas }}
-                </p>
-                @endif
-            </div>
-        </div>
-
-        <!-- Diagnóstico y Reparación -->
-        @if($reparacion->diagnostico)
-        <div class="section">
-            <h3>DIAGNÓSTICO Y REPARACIÓN</h3>
-            <div class="section-content">
-                <p><strong>Diagnóstico:</strong></p>
-                <p style="background: #eff6ff; padding: 10px; border-radius: 5px; margin: 5px 0 15px 0;">
-                    {{ $reparacion->diagnostico }}
-                </p>
-                @if($reparacion->solucion_aplicada)
-                <p><strong>Solución Aplicada:</strong></p>
-                <p style="background: #f0fdf4; padding: 10px; border-radius: 5px; margin-top: 5px;">
-                    {{ $reparacion->solucion_aplicada }}
-                </p>
-                @endif
-                @if($reparacion->repuestos_usados)
-                <p style="margin-top: 10px;"><strong>Repuestos Utilizados:</strong></p>
-                <p style="background: #fef3c7; padding: 10px; border-radius: 5px; margin-top: 5px;">
-                    {{ $reparacion->repuestos_usados }}
-                </p>
-                @endif
-            </div>
-        </div>
-        @endif
-
-        <!-- Costos -->
-        <div class="section">
-            <h3>COSTOS</h3>
-            <div class="section-content">
-                <div class="info-grid">
-                    <div class="info-row">
-                        <div class="info-cell">
-                            <strong>Costo Estimado:</strong> {{ money($reparacion->costo_estimado) }}
-                        </div>
-                        <div class="info-cell">
-                            <strong>Costo Final:</strong> {{ money($reparacion->costo_final) }}
-                        </div>
-                    </div>
-                    <div class="info-row">
-                        <div class="info-cell">
-                            <strong>Abono/Adelanto:</strong> {{ money($reparacion->adelanto) }}
-                        </div>
-                        <div class="info-cell">
-                            <strong>Saldo Pendiente:</strong> {{ money($reparacion->costo_final - $reparacion->adelanto) }}
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Garantía -->
-        @if($reparacion->garantia_dias)
-        <div class="section">
-            <h3>GARANTÍA</h3>
-            <div class="section-content">
-                <p>Esta reparación cuenta con una garantía de <strong>{{ $reparacion->garantia_dias }} días</strong> a partir de la fecha de entrega.</p>
-                @if($reparacion->garantia_hasta)
-                <p style="margin-top: 5px;">Válida hasta: <strong>{{ $reparacion->garantia_hasta->format('d/m/Y') }}</strong></p>
-                @endif
-            </div>
-        </div>
-        @endif
-
-        <!-- Condiciones -->
-        <div class="condiciones">
-            <h4>TÉRMINOS Y CONDICIONES</h4>
-            <ol>
-                <li>El cliente acepta que el dispositivo será revisado para determinar el diagnóstico final.</li>
-                <li>Los costos estimados pueden variar según el diagnóstico real.</li>
-                <li>No nos hacemos responsables por datos perdidos durante la reparación. Se recomienda hacer backup.</li>
-                <li>Los equipos no reclamados en 30 días después de notificación de reparación completa serán dados de baja.</li>
-                <li>La garantía cubre únicamente la reparación realizada y no daños por mal uso o accidentes.</li>
-                <li>El cliente debe presentar esta orden para retirar el dispositivo.</li>
-            </ol>
-        </div>
-
-        <!-- QR Code -->
-        <div class="qr-code">
-            <div class="qr-placeholder">
-                QR: {{ $reparacion->numero_orden }}
-            </div>
-            <p style="font-size: 10px; color: #666;">Escanea para ver el estado de tu reparación</p>
-        </div>
-
-        <!-- Firmas -->
-        <div class="firma-section">
-            <div class="firma-box">
-                <div class="firma-line">
-                    Firma del Cliente<br>
-                    <small>{{ $reparacion->cliente->nombre }}</small>
-                </div>
-            </div>
-            <div class="firma-box">
-                <div class="firma-line">
-                    Firma del Técnico/Recepcionista<br>
-                    <small>{{ $reparacion->tecnico->name ?? auth()->user()->name }}</small>
-                </div>
-            </div>
-        </div>
-
-        <!-- Footer -->
-        <div class="footer">
-            <p>Documento generado el {{ now()->format('d/m/Y H:i') }} | {{ config('app.name') }}</p>
-            <p>Para consultas sobre tu reparación, contactanos con tu número de orden: <strong>{{ $reparacion->numero_orden }}</strong></p>
+    <div class="section">
+        <h3>INFORMACION DEL CLIENTE</h3>
+        <div class="section-body">
+            <table>
+                <tr>
+                    <td><span class="label">Nombre:</span> {{ $cliente?->nombre_completo ?? 'Cliente no registrado' }}</td>
+                    <td><span class="label">Telefono:</span> {{ $cliente?->telefono ?? 'N/A' }}</td>
+                </tr>
+                <tr>
+                    <td><span class="label">Email:</span> {{ $cliente?->email ?? 'N/A' }}</td>
+                    <td><span class="label">Direccion:</span> {{ $cliente?->direccion ?? 'N/A' }}</td>
+                </tr>
+            </table>
         </div>
     </div>
+
+    <div class="section">
+        <h3>INFORMACION DEL EQUIPO</h3>
+        <div class="section-body">
+            <table>
+                <tr>
+                    <td><span class="label">Tipo:</span> {{ $reparacion->dispositivo_tipo ?: 'N/A' }}</td>
+                    <td><span class="label">Marca:</span> {{ $reparacion->dispositivo_marca ?: 'N/A' }}</td>
+                    <td><span class="label">Modelo:</span> {{ $reparacion->dispositivo_modelo ?: 'N/A' }}</td>
+                </tr>
+                <tr>
+                    <td><span class="label">Color:</span> {{ $reparacion->dispositivo_color ?: 'N/A' }}</td>
+                    <td><span class="label">IMEI:</span> {{ $reparacion->dispositivo_imei ?: 'N/A' }}</td>
+                    <td><span class="label">Serial:</span> {{ $reparacion->dispositivo_serial ?: 'N/A' }}</td>
+                </tr>
+            </table>
+            @if($reparacion->dispositivo_contrasena)
+                <div style="margin-top: 8px;"><span class="label">Contrasena / Patron:</span> {{ $reparacion->dispositivo_contrasena }}</div>
+            @endif
+            @if($reparacion->accesorios_incluidos)
+                <div style="margin-top: 8px;"><span class="label">Accesorios incluidos:</span> {{ $reparacion->accesorios_incluidos }}</div>
+            @endif
+        </div>
+    </div>
+
+    <div class="section">
+        <h3>PROBLEMA Y DIAGNOSTICO</h3>
+        <div class="section-body">
+            <div class="label">Problema reportado</div>
+            <div class="text-box">{{ $reparacion->problema_reportado ?: 'Sin descripcion del problema.' }}</div>
+
+            @if($reparacion->condiciones_previas)
+                <div class="label" style="margin-top: 10px;">Condiciones previas</div>
+                <div class="text-box">{{ $reparacion->condiciones_previas }}</div>
+            @endif
+
+            @if($reparacion->diagnostico)
+                <div class="label" style="margin-top: 10px;">Diagnostico</div>
+                <div class="text-box">{{ $reparacion->diagnostico }}</div>
+            @endif
+
+            @if($reparacion->solucion)
+                <div class="label" style="margin-top: 10px;">Solucion</div>
+                <div class="text-box">{{ $reparacion->solucion }}</div>
+            @endif
+
+            @if($reparacion->notas_tecnico)
+                <div class="label" style="margin-top: 10px;">Notas del tecnico</div>
+                <div class="text-box">{{ $reparacion->notas_tecnico }}</div>
+            @endif
+        </div>
+    </div>
+
+    <div class="section">
+        <h3>COSTOS Y COBRO</h3>
+        <div class="section-body">
+            <table class="money-table">
+                <tr>
+                    <td><span class="label">Costo estimado</span></td>
+                    <td class="right">{{ money($costoEstimado) }}</td>
+                </tr>
+                <tr>
+                    <td><span class="label">Costo final</span></td>
+                    <td class="right">
+                        {{ money($costoFinal) }}
+                        @if($costoFinalRegistrado <= 0 && $costoEstimado > 0)
+                            <span class="muted">(estimado)</span>
+                        @endif
+                    </td>
+                </tr>
+                <tr>
+                    <td><span class="label">Adelanto</span></td>
+                    <td class="right">{{ money($reparacion->adelanto) }}</td>
+                </tr>
+                <tr>
+                    <td><span class="label">Saldo pendiente</span></td>
+                    <td class="right"><strong>{{ money($saldoPendiente) }}</strong></td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+    @if($reparacion->garantia_dias)
+        <div class="section">
+            <h3>GARANTIA</h3>
+            <div class="section-body">
+                Esta reparacion cuenta con una garantia de <strong>{{ $reparacion->garantia_dias }} dias</strong> a partir de la fecha de entrega.
+            </div>
+        </div>
+    @endif
+
+    <div class="terms">
+        <h4>TERMINOS Y CONDICIONES</h4>
+        <ol>
+            <li>El cliente acepta que el dispositivo sera revisado para determinar el diagnostico final.</li>
+            <li>Los costos estimados pueden variar segun el diagnostico real.</li>
+            <li>No nos hacemos responsables por datos perdidos durante la reparacion. Se recomienda hacer backup.</li>
+            <li>Los equipos no reclamados en 30 dias despues de notificacion seran dados de baja.</li>
+            <li>La garantia cubre unicamente la reparacion realizada y no danos por mal uso o accidentes.</li>
+            <li>El cliente debe presentar esta orden para retirar el dispositivo.</li>
+        </ol>
+    </div>
+
+    <div class="signatures">
+        <div class="signature">
+            <div class="line">
+                Firma del Cliente<br>
+                <small>{{ $cliente?->nombre_completo }}</small>
+            </div>
+        </div>
+        <div class="signature">
+            <div class="line">
+                Firma del Tecnico / Recepcionista<br>
+                <small>{{ $tecnico?->name ?? $recibidoPor?->name ?? auth()->user()->name }}</small>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        Documento generado el {{ now()->format('d/m/Y H:i') }} | Orden {{ $reparacion->orden }}
+    </div>
+</div>
 </body>
 </html>

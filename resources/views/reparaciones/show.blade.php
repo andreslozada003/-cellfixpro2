@@ -27,11 +27,11 @@
     $usuario = $reparacion->usuario;
     $tecnico = $reparacion->tecnico;
     $costoEstimado = (float) $reparacion->costo_estimado;
-    $costoFinal = (float) $reparacion->costo_final;
+    $costoFinalRegistrado = (float) $reparacion->costo_final;
+    $costoFinal = $costoFinalRegistrado > 0 ? $costoFinalRegistrado : $costoEstimado;
+    $costoFinalEsEstimado = $costoFinalRegistrado <= 0 && $costoEstimado > 0;
     $adelanto = (float) $reparacion->adelanto;
-    $saldoPendiente = $costoFinal > 0
-        ? max(0, $costoFinal - $adelanto)
-        : max(0, $costoEstimado - $adelanto);
+    $saldoPendiente = max(0, $costoFinal - $adelanto);
 
     $fotosAntes = collect([
         $reparacion->foto_antes_1,
@@ -217,46 +217,37 @@
         </div>
     </div>
 
-    <div class="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
-        <h3 class="mb-4 text-lg font-semibold text-gray-800">
+    <div class="rounded-lg border border-gray-200 bg-white p-5 shadow-sm sm:p-6">
+        <h3 class="mb-4 flex items-center text-lg font-semibold text-gray-800">
             <i class="fas fa-dollar-sign mr-2 text-primary-600"></i>Costos y cobro
         </h3>
 
-        <div class="space-y-3">
-            <div class="flex items-center justify-between">
+        <div class="divide-y divide-gray-100 overflow-hidden rounded-lg border border-gray-100">
+            <div class="flex items-center justify-between gap-4 px-4 py-3">
                 <span class="text-gray-500">Costo estimado</span>
-                <span class="font-medium text-gray-800">{{ money($costoEstimado) }}</span>
+                <span class="text-right font-semibold text-gray-800">{{ money($costoEstimado) }}</span>
             </div>
-            <div class="flex items-center justify-between">
+            <div class="flex items-center justify-between gap-4 px-4 py-3">
                 <span class="text-gray-500">Adelanto</span>
-                <span class="font-medium text-green-600">{{ money($adelanto) }}</span>
+                <span class="text-right font-semibold text-green-600">{{ money($adelanto) }}</span>
             </div>
-            <div class="flex items-center justify-between">
+            <div class="flex items-center justify-between gap-4 px-4 py-3">
                 <span class="text-gray-500">Costo final</span>
-                @if($costoFinal > 0)
-                <span class="font-medium text-primary-600">{{ money($costoFinal) }}</span>
-                @else
-                <span class="font-medium text-amber-600">Pendiente de definir</span>
-                @endif
-            </div>
-
-            <div class="border-t border-gray-200 pt-3">
-                <div class="flex items-center justify-between">
-                    <span class="text-gray-500">Saldo pendiente</span>
-                    @if($costoFinal > 0)
-                    <span class="font-bold {{ $saldoPendiente > 0 ? 'text-red-600' : 'text-green-600' }}">
-                        {{ money($saldoPendiente) }}
-                    </span>
-                    @else
-                    <span class="font-bold text-amber-600">Por calcular</span>
+                <span class="text-right font-semibold text-primary-600">
+                    {{ money($costoFinal) }}
+                    @if($costoFinalEsEstimado)
+                    <span class="ml-1 text-xs font-medium text-gray-400">(estimado)</span>
                     @endif
-                </div>
+                </span>
+            </div>
+        </div>
 
-                @if($costoFinal <= 0 && $costoEstimado > 0)
-                <p class="mt-2 text-xs text-gray-500">
-                    Referencia actual: con el costo estimado quedarian {{ money(max(0, $costoEstimado - $adelanto)) }} por cobrar.
-                </p>
-                @endif
+        <div class="mt-4 rounded-lg bg-gray-50 px-4 py-3">
+            <div class="flex items-center justify-between gap-4">
+                <span class="font-medium text-gray-700">Saldo pendiente</span>
+                <span class="text-right text-lg font-bold {{ $saldoPendiente > 0 ? 'text-red-600' : 'text-green-600' }}">
+                    {{ money($saldoPendiente) }}
+                </span>
             </div>
         </div>
     </div>
@@ -316,19 +307,18 @@
     </div>
 </div>
 
-@if($fotosAntes->isNotEmpty() || $fotosDespues->isNotEmpty())
 <div class="mt-6 rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
     <h3 class="mb-4 text-lg font-semibold text-gray-800">
         <i class="fas fa-camera mr-2 text-primary-600"></i>Registro fotografico
     </h3>
 
     <div class="grid grid-cols-1 gap-6 xl:grid-cols-2">
-        <div>
-            <p class="mb-3 text-sm font-medium text-gray-500">Fotos antes</p>
+        <div class="rounded-lg border border-gray-100 bg-gray-50 p-4">
+            <p class="mb-3 font-medium text-gray-700">Fotos antes de la reparacion</p>
             <div class="grid grid-cols-2 gap-3 md:grid-cols-3">
                 @forelse($fotosAntes as $foto)
-                <a href="{{ asset('storage/' . $foto) }}" target="_blank" class="block overflow-hidden rounded-lg border border-gray-200">
-                    <img src="{{ asset('storage/' . $foto) }}" alt="Foto antes" class="h-32 w-full object-cover">
+                <a href="{{ asset('storage/' . $foto) }}" target="_blank" class="block overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm">
+                    <img src="{{ asset('storage/' . $foto) }}" alt="Foto antes" class="h-36 w-full object-cover">
                 </a>
                 @empty
                 <p class="col-span-full text-sm text-gray-500">No hay fotos iniciales registradas.</p>
@@ -336,21 +326,38 @@
             </div>
         </div>
 
-        <div>
-            <p class="mb-3 text-sm font-medium text-gray-500">Fotos despues</p>
+        <div class="rounded-lg border border-gray-100 bg-gray-50 p-4">
+            <p class="mb-3 font-medium text-gray-700">Fotos despues de la reparacion</p>
             <div class="grid grid-cols-2 gap-3 md:grid-cols-3">
                 @forelse($fotosDespues as $foto)
-                <a href="{{ asset('storage/' . $foto) }}" target="_blank" class="block overflow-hidden rounded-lg border border-gray-200">
-                    <img src="{{ asset('storage/' . $foto) }}" alt="Foto despues" class="h-32 w-full object-cover">
+                <a href="{{ asset('storage/' . $foto) }}" target="_blank" class="block overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm">
+                    <img src="{{ asset('storage/' . $foto) }}" alt="Foto despues" class="h-36 w-full object-cover">
                 </a>
                 @empty
                 <p class="col-span-full text-sm text-gray-500">Todavia no hay fotos finales registradas.</p>
                 @endforelse
             </div>
+
+            @if($reparacion->estado !== 'entregado' && $reparacion->estado !== 'cancelado')
+            <form action="{{ route('reparaciones.fotos-despues', $reparacion) }}" method="POST" enctype="multipart/form-data" class="mt-4 border-t border-gray-200 pt-4">
+                @csrf
+                <div class="grid grid-cols-1 gap-3 md:grid-cols-3 xl:grid-cols-1 2xl:grid-cols-3">
+                    @for($i = 1; $i <= 3; $i++)
+                    <div>
+                        <label for="foto_despues_{{ $i }}" class="mb-1 block text-sm font-medium text-gray-600">Foto despues {{ $i }}</label>
+                        <input type="file" name="foto_despues_{{ $i }}" id="foto_despues_{{ $i }}" accept="image/*"
+                            class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm file:mr-3 file:rounded-lg file:border-0 file:bg-primary-50 file:px-3 file:py-2 file:text-sm file:font-semibold file:text-primary-700 hover:file:bg-primary-100">
+                    </div>
+                    @endfor
+                </div>
+                <button type="submit" class="mt-3 inline-flex items-center rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-primary-700">
+                    <i class="fas fa-upload mr-2"></i>Subir fotos despues
+                </button>
+            </form>
+            @endif
         </div>
     </div>
 </div>
-@endif
 
 <div class="mt-6 rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
     <h3 class="mb-4 text-lg font-semibold text-gray-800">

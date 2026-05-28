@@ -87,6 +87,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('facturacion/{factura}', [FacturacionElectronicaController::class, 'show'])->name('facturacion.show');
 
     // Reparaciones
+    Route::get('reparaciones/tecnicos/crear', [ReparacionController::class, 'createTecnico'])->name('reparaciones.tecnicos.create');
+    Route::post('reparaciones/tecnicos', [ReparacionController::class, 'storeTecnico'])->name('reparaciones.tecnicos.store');
     Route::resource('reparaciones', ReparacionController::class)
         ->parameters(['reparaciones' => 'reparacion']);
     Route::post('reparaciones/{reparacion}/cambiar-estado', [ReparacionController::class, 'cambiarEstado'])->name('reparaciones.cambiar-estado');
