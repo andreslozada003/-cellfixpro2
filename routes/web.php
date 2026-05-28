@@ -89,12 +89,14 @@ Route::middleware(['auth'])->group(function () {
     // Reparaciones
     Route::get('reparaciones/tecnicos/crear', [ReparacionController::class, 'createTecnico'])->name('reparaciones.tecnicos.create');
     Route::post('reparaciones/tecnicos', [ReparacionController::class, 'storeTecnico'])->name('reparaciones.tecnicos.store');
+    Route::get('reparaciones/servicio-tecnico', [ReparacionController::class, 'servicioTecnico'])->name('reparaciones.servicio-tecnico');
     Route::resource('reparaciones', ReparacionController::class)
         ->parameters(['reparaciones' => 'reparacion']);
     Route::post('reparaciones/{reparacion}/cambiar-estado', [ReparacionController::class, 'cambiarEstado'])->name('reparaciones.cambiar-estado');
     Route::post('reparaciones/{reparacion}/fotos-despues', [ReparacionController::class, 'subirFotosDespues'])->name('reparaciones.fotos-despues');
     Route::get('reparaciones/{reparacion}/notificar', [ReparacionController::class, 'notificar'])->name('reparaciones.notificar');
     Route::get('reparaciones/{reparacion}/imprimir-orden', [ReparacionController::class, 'imprimirOrden'])->name('reparaciones.imprimir-orden');
+    Route::get('reparaciones/{reparacion}/comprobante-servicio-tecnico', [ReparacionController::class, 'comprobanteServicioTecnico'])->name('reparaciones.comprobante-servicio-tecnico');
     Route::get('reparaciones/{reparacion}/ticket-entrega', [ReparacionController::class, 'ticketEntrega'])->name('reparaciones.ticket-entrega');
     Route::get('panel-tecnico', [ReparacionController::class, 'panelTecnico'])->name('reparaciones.panel-tecnico');
     Route::get('reparaciones-estadisticas', [ReparacionController::class, 'estadisticas'])->name('reparaciones.estadisticas');

@@ -11,6 +11,9 @@
         </p>
     </div>
     <div class="flex flex-wrap gap-3">
+        <a href="{{ route('reparaciones.comprobante-servicio-tecnico', $reparacion) }}" target="_blank" class="inline-flex items-center rounded-lg bg-primary-600 px-4 py-2 text-white transition-colors hover:bg-primary-700">
+            <i class="fas fa-file-pdf mr-2"></i>Servicio Técnico
+        </a>
         <a href="{{ route('reparaciones.imprimir-orden', $reparacion) }}" target="_blank" class="inline-flex items-center rounded-lg bg-gray-600 px-4 py-2 text-white transition-colors hover:bg-gray-700">
             <i class="fas fa-print mr-2"></i>Imprimir
         </a>

@@ -33,7 +33,7 @@ class ReparacionController extends Controller
     public function __construct()
     {
         $this->middleware('auth');
-        $this->middleware('can:ver reparaciones')->only(['index', 'show']);
+        $this->middleware('can:ver reparaciones')->only(['index', 'show', 'servicioTecnico', 'comprobanteServicioTecnico']);
         $this->middleware('can:crear reparaciones')->only(['create', 'store', 'createTecnico', 'storeTecnico']);
         $this->middleware('can:editar reparaciones')->only(['edit', 'update']);
         $this->middleware('can:cambiar estado reparaciones')->only(['cambiarEstado']);
@@ -242,6 +242,55 @@ class ReparacionController extends Controller
         $estados = Reparacion::ESTADOS;
 
         return view('reparaciones.show', compact('reparacion', 'tecnicos', 'estados'));
+    }
+
+    /**
+     * Modulo de servicio tecnico para emitir comprobantes de reparacion.
+     */
+    public function servicioTecnico(Request $request)
+    {
+        $query = Reparacion::with(['cliente', 'tecnico'])
+            ->latest('fecha_recepcion');
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('orden', 'like', "%{$search}%")
+                    ->orWhere('dispositivo_tipo', 'like', "%{$search}%")
+                    ->orWhere('dispositivo_marca', 'like', "%{$search}%")
+                    ->orWhere('dispositivo_modelo', 'like', "%{$search}%")
+                    ->orWhere('diagnostico', 'like', "%{$search}%")
+                    ->orWhereHas('cliente', function ($qc) use ($search) {
+                        $qc->where('nombre', 'like', "%{$search}%")
+                            ->orWhere('apellido', 'like', "%{$search}%")
+                            ->orWhere('telefono', 'like', "%{$search}%");
+                    });
+            });
+        }
+
+        $reparaciones = $query->paginate(20);
+
+        return view('reparaciones.servicio-tecnico', compact('reparaciones'));
+    }
+
+    /**
+     * Comprobante de reparacion del modulo Servicio Tecnico.
+     */
+    public function comprobanteServicioTecnico(Reparacion $reparacion)
+    {
+        $reparacion->load(['cliente', 'usuario', 'tecnico']);
+
+        $empresa = [
+            'nombre' => Configuracion::get('empresa.nombre', 'Servicio Tecnico'),
+            'direccion' => Configuracion::get('empresa.direccion', ''),
+            'telefono' => Configuracion::get('empresa.telefono', ''),
+            'rfc' => Configuracion::get('empresa.rfc', ''),
+        ];
+
+        $pdf = Pdf::loadView('reparaciones.comprobante-servicio-tecnico', compact('reparacion', 'empresa'));
+        $pdf->setPaper([0, 0, 360, 255], 'landscape');
+
+        return $pdf->stream("comprobante-servicio-tecnico-{$reparacion->orden}.pdf");
     }
 
     /**

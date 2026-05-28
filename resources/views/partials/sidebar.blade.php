@@ -91,6 +91,10 @@
                     <i class="fas fa-list w-4"></i>
                     <span>Todas las Órdenes</span>
                 </a>
+                <a href="{{ route('reparaciones.servicio-tecnico') }}" class="flex items-center space-x-3 px-3 py-2 rounded-lg text-sm {{ request()->routeIs('reparaciones.servicio-tecnico') ? 'text-primary-400' : 'text-gray-400 hover:text-white' }}">
+                    <i class="fas fa-file-medical w-4"></i>
+                    <span>Servicio Técnico</span>
+                </a>
                 @can('crear reparaciones')
                 <a href="{{ route('reparaciones.create') }}" class="flex items-center space-x-3 px-3 py-2 rounded-lg text-sm {{ request()->routeIs('reparaciones.create') ? 'text-primary-400' : 'text-gray-400 hover:text-white' }}">
                     <i class="fas fa-plus w-4"></i>
