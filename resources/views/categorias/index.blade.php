@@ -34,10 +34,12 @@
                 <tr class="hover:bg-gray-50 {{ !$categoria->activo ? 'bg-gray-100' : '' }}">
                     <td class="px-4 py-3">
                         <div class="flex items-center">
-                            @if($categoria->icono)
-                            <div class="w-10 h-10 rounded-lg flex items-center justify-center mr-3" style="background-color: {{ $categoria->color }}20;">
-                                <i class="fas fa-{{ $categoria->icono }}" style="color: {{ $categoria->color }}"></i>
-                            </div>
+                            @if($categoria->imagen_url)
+                                <img src="{{ $categoria->imagen_url }}" alt="" class="w-10 h-10 rounded-lg object-cover mr-3 border border-gray-200">
+                            @elseif($categoria->icono)
+                                <div class="w-10 h-10 rounded-lg flex items-center justify-center mr-3" style="background-color: {{ $categoria->color }}20;">
+                                    <i class="fas fa-{{ $categoria->icono }}" style="color: {{ $categoria->color }}"></i>
+                                </div>
                             @endif
                             <div>
                                 <p class="font-medium text-gray-900">{{ $categoria->nombre }}</p>

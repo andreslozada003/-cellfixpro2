@@ -23,10 +23,14 @@
                 <div class="p-6" style="border-left: 4px solid {{ $categoria->color ?? '#3b82f6' }}">
                     <div class="flex items-start justify-between">
                         <div class="flex items-center">
-                            <div class="w-16 h-16 rounded-lg flex items-center justify-center text-3xl mr-4" 
-                                 style="background-color: {{ $categoria->color ?? '#3b82f6' }}20; color: {{ $categoria->color ?? '#3b82f6' }}">
-                                <i class="fas {{ $categoria->icono ?? 'fa-folder' }}"></i>
-                            </div>
+                            @if($categoria->imagen_url)
+                                <img src="{{ $categoria->imagen_url }}" alt="" class="w-16 h-16 rounded-lg object-cover mr-4 border border-gray-200">
+                            @else
+                                <div class="w-16 h-16 rounded-lg flex items-center justify-center text-3xl mr-4"
+                                     style="background-color: {{ $categoria->color ?? '#3b82f6' }}20; color: {{ $categoria->color ?? '#3b82f6' }}">
+                                    <i class="fas fa-{{ $categoria->icono ?? 'folder' }}"></i>
+                                </div>
+                            @endif
                             <div>
                                 <h2 class="text-2xl font-bold text-gray-800">{{ $categoria->nombre }}</h2>
                                 <p class="text-gray-500 mt-1">
@@ -79,8 +83,8 @@
                                 <td class="px-6 py-4 whitespace-nowrap text-sm font-mono text-gray-500">{{ $producto->codigo }}</td>
                                 <td class="px-6 py-4">
                                     <div class="flex items-center">
-                                        @if($producto->imagen)
-                                        <img src="{{ Storage::url($producto->imagen) }}" alt="" class="w-10 h-10 rounded object-cover mr-3">
+                                        @if($producto->imagen_principal)
+                                        <img src="{{ $producto->imagen_url }}" alt="" class="w-10 h-10 rounded object-cover mr-3">
                                         @else
                                         <div class="w-10 h-10 rounded bg-gray-200 flex items-center justify-center mr-3">
                                             <i class="fas fa-image text-gray-400"></i>
@@ -166,7 +170,7 @@
                     @foreach($categoria->children as $sub)
                     <a href="{{ route('categorias.show', $sub) }}" class="flex items-center p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition">
                         <div class="w-8 h-8 rounded flex items-center justify-center mr-3" style="background-color: {{ $sub->color ?? '#3b82f6' }}20; color: {{ $sub->color ?? '#3b82f6' }}">
-                            <i class="fas {{ $sub->icono ?? 'fa-folder' }} text-sm"></i>
+                            <i class="fas fa-{{ $sub->icono ?? 'folder' }} text-sm"></i>
                         </div>
                         <div class="flex-1">
                             <span class="text-sm font-medium text-gray-800">{{ $sub->nombre }}</span>

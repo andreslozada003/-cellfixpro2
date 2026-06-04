@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Categoria;
+use Illuminate\Support\Facades\Storage;
 
 class CategoriaController extends Controller
 {
@@ -24,7 +25,7 @@ class CategoriaController extends Controller
      */
     public function index()
     {
-        $categorias = Categoria::withCount('productos')
+        $categorias = Categoria::withCount(['productos', 'children'])
             ->with('children')
             ->whereNull('parent_id')
             ->orderBy('orden')
@@ -51,10 +52,15 @@ class CategoriaController extends Controller
             'nombre' => 'required|string|max:255',
             'descripcion' => 'nullable|string',
             'icono' => 'nullable|string|max:50',
+            'imagen' => 'nullable|image|max:2048',
             'color' => 'nullable|string|max:7',
             'parent_id' => 'nullable|exists:categorias,id',
             'orden' => 'integer|min:0',
         ]);
+
+        if ($request->hasFile('imagen')) {
+            $validated['imagen'] = $request->file('imagen')->store('categorias', 'public');
+        }
 
         Categoria::create($validated);
 
@@ -67,11 +73,31 @@ class CategoriaController extends Controller
      */
     public function show(Categoria $categoria)
     {
-        $categoria->load(['children', 'productos' => function($q) {
-            $q->where('activo', true)->limit(20);
-        }]);
+        $categoria->load([
+            'parent',
+            'children' => function ($query) {
+                $query->withCount('productos')->orderBy('orden');
+            },
+        ])->loadCount('productos');
 
-        return view('categorias.show', compact('categoria'));
+        $productosBaseQuery = $categoria->productos()->active();
+        $productosQuery = (clone $productosBaseQuery)->orderBy('nombre');
+
+        $stats = [
+            'total_productos' => (clone $productosBaseQuery)->count(),
+            'valor_inventario' => (float) (clone $productosBaseQuery)
+                ->selectRaw('COALESCE(SUM(stock * precio_compra), 0) as total')
+                ->value('total'),
+            'stock_bajo' => (clone $productosBaseQuery)
+                ->whereColumn('stock', '<=', 'stock_minimo')
+                ->where('es_servicio', false)
+                ->count(),
+            'subcategorias' => $categoria->children->count(),
+        ];
+
+        $productos = $productosQuery->paginate(10)->withQueryString();
+
+        return view('categorias.show', compact('categoria', 'productos', 'stats'));
     }
 
     /**
@@ -96,6 +122,7 @@ class CategoriaController extends Controller
             'nombre' => 'required|string|max:255',
             'descripcion' => 'nullable|string',
             'icono' => 'nullable|string|max:50',
+            'imagen' => 'nullable|image|max:2048',
             'color' => 'nullable|string|max:7',
             'parent_id' => 'nullable|exists:categorias,id',
             'orden' => 'integer|min:0',
@@ -108,6 +135,14 @@ class CategoriaController extends Controller
         }
 
         $validated['activo'] = $request->boolean('activo', true);
+
+        if ($request->hasFile('imagen')) {
+            if ($categoria->imagen) {
+                Storage::disk('public')->delete($categoria->imagen);
+            }
+
+            $validated['imagen'] = $request->file('imagen')->store('categorias', 'public');
+        }
 
         $categoria->update($validated);
 

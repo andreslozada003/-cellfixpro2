@@ -112,7 +112,7 @@
                 </div>
                 
                 <div class="relative z-10 mt-8 text-sm text-primary-200">
-                    <p>&copy; {{ date('Y') }} CellFix Pro. Todos los derechos reservados.</p>
+                    <p>&copy; 2026 CellFix Pro. Todos los derechos reservados. Diseñado y desarrollado por <a href="https://alfadigitalsolutionssas.com" target="_blank" rel="noopener noreferrer" class="text-white hover:underline">alfadigitalsolutionssas.com</a></p>
                 </div>
             </div>
             

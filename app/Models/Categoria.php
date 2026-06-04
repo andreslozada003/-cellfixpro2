@@ -16,6 +16,7 @@ class Categoria extends Model
         'slug',
         'descripcion',
         'icono',
+        'imagen',
         'color',
         'parent_id',
         'orden',
@@ -35,10 +36,25 @@ class Categoria extends Model
         parent::boot();
 
         static::creating(function ($categoria) {
-            if (empty($categoria->slug)) {
-                $categoria->slug = Str::slug($categoria->nombre);
-            }
+            $categoria->slug = static::uniqueSlug($categoria->slug ?: $categoria->nombre);
         });
+    }
+
+    /**
+     * Crear un slug disponible respetando el indice unico de la tabla.
+     */
+    protected static function uniqueSlug(string $value): string
+    {
+        $baseSlug = Str::slug($value) ?: 'categoria';
+        $slug = $baseSlug;
+        $counter = 2;
+
+        while (static::withTrashed()->where('slug', $slug)->exists()) {
+            $slug = "{$baseSlug}-{$counter}";
+            $counter++;
+        }
+
+        return $slug;
     }
 
     /**
@@ -87,5 +103,10 @@ class Categoria extends Model
     public function getProductosCountAttribute(): int
     {
         return $this->productos()->count();
+    }
+
+    public function getImagenUrlAttribute(): ?string
+    {
+        return $this->imagen ? asset('storage/' . $this->imagen) : null;
     }
 }
