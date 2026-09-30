@@ -155,6 +155,10 @@
         @endcan
         
         @can('ver reportes')
+        <a href="{{ route('cierres-caja.index') }}" class="flex items-center space-x-3 px-3 py-2 rounded-lg {{ request()->routeIs('cierres-caja.*') ? 'bg-primary-600 text-white' : 'text-gray-300 hover:bg-gray-800 hover:text-white' }} transition-colors">
+            <i class="fas fa-lock w-5"></i>
+            <span>Cierre de caja</span>
+        </a>
         <!-- Reportes -->
         <div x-data="{ open: {{ request()->routeIs('reportes.*') ? 'true' : 'false' }} }">
             <button @click="open = !open" class="w-full flex items-center justify-between px-3 py-2 rounded-lg {{ request()->routeIs('reportes.*') ? 'bg-primary-600 text-white' : 'text-gray-300 hover:bg-gray-800 hover:text-white' }} transition-colors">

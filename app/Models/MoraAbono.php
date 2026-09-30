@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
+use App\Services\CierreBloqueoService;
 
 class MoraAbono extends Model
 {
@@ -28,6 +29,13 @@ class MoraAbono extends Model
         'monto' => 'decimal:2',
         'fecha_pago' => 'datetime',
     ];
+
+    protected static function boot()
+    {
+        parent::boot();
+        static::saving(fn ($abono) => CierreBloqueoService::verificar($abono));
+        static::deleting(fn ($abono) => CierreBloqueoService::verificar($abono, 'eliminacion'));
+    }
 
     public function moraAbonable(): MorphTo
     {

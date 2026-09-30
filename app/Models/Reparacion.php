@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use App\Services\CierreBloqueoService;
 
 class Reparacion extends Model
 {
@@ -102,6 +103,7 @@ class Reparacion extends Model
         parent::boot();
 
         static::creating(function ($reparacion) {
+            CierreBloqueoService::verificar($reparacion);
             if (empty($reparacion->orden)) {
                 $reparacion->orden = 'R-' . date('Ymd') . '-' . strtoupper(\Illuminate\Support\Str::random(6));
             }
@@ -109,6 +111,9 @@ class Reparacion extends Model
                 $reparacion->fecha_recepcion = now();
             }
         });
+
+        static::saving(fn ($reparacion) => CierreBloqueoService::verificar($reparacion));
+        static::deleting(fn ($reparacion) => CierreBloqueoService::verificar($reparacion, 'eliminacion'));
 
         static::updated(function ($reparacion) {
             // Si cambió a estado "listo", crear notificación

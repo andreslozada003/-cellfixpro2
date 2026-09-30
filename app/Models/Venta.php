@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Schema;
+use App\Services\CierreBloqueoService;
 
 class Venta extends Model
 {
@@ -60,6 +61,7 @@ class Venta extends Model
         parent::boot();
 
         static::creating(function ($venta) {
+            CierreBloqueoService::verificar($venta);
             if (empty($venta->folio)) {
                 $venta->folio = 'V-' . date('Ymd') . '-' . strtoupper(\Illuminate\Support\Str::random(6));
             }
@@ -67,6 +69,9 @@ class Venta extends Model
                 $venta->fecha_venta = now();
             }
         });
+
+        static::saving(fn ($venta) => CierreBloqueoService::verificar($venta));
+        static::deleting(fn ($venta) => CierreBloqueoService::verificar($venta, 'eliminacion'));
 
         static::created(function ($venta) {
             Notificacion::create([

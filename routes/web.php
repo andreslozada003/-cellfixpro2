@@ -17,6 +17,7 @@ use App\Http\Controllers\GastoProveedorController;
 use App\Http\Controllers\HerramientaController;
 use App\Http\Controllers\MoraController;
 use App\Http\Controllers\AzLibroController;
+use App\Http\Controllers\CierreCajaController;
 
 /*
 |--------------------------------------------------------------------------
@@ -102,6 +103,12 @@ Route::middleware(['auth'])->group(function () {
     Route::get('reparaciones-estadisticas', [ReparacionController::class, 'estadisticas'])->name('reparaciones.estadisticas');
 
     // Reportes
+    Route::prefix('cierres-caja')->name('cierres-caja.')->group(function () {
+        Route::get('/', [CierreCajaController::class, 'index'])->name('index');
+        Route::post('diario', [CierreCajaController::class, 'cerrarDiario'])->name('diario');
+        Route::post('mensual', [CierreCajaController::class, 'cerrarMensual'])->name('mensual');
+        Route::get('{cierreCaja}', [CierreCajaController::class, 'show'])->name('show');
+    });
     Route::get('reportes', [ReporteController::class, 'index'])->name('reportes.index');
     Route::get('reportes/ventas', [ReporteController::class, 'ventas'])->name('reportes.ventas');
     Route::get('reportes/reparaciones', [ReporteController::class, 'reparaciones'])->name('reportes.reparaciones');

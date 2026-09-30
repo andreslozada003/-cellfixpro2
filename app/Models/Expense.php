@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
+use App\Services\CierreBloqueoService;
 
 class Expense extends Model
 {
@@ -64,6 +65,7 @@ class Expense extends Model
         parent::boot();
 
         static::creating(function ($expense) {
+            CierreBloqueoService::verificar($expense);
             if (empty($expense->expense_number)) {
                 $expense->expense_number = self::generateExpenseNumber();
             }
@@ -71,6 +73,9 @@ class Expense extends Model
                 $expense->expense_date = now();
             }
         });
+
+        static::saving(fn ($expense) => CierreBloqueoService::verificar($expense));
+        static::deleting(fn ($expense) => CierreBloqueoService::verificar($expense, 'eliminacion'));
     }
 
     public static function generateExpenseNumber(): string
